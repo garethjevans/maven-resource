@@ -24,11 +24,12 @@ type metadata struct {
 	Release string `xml:"versioning>release"`
 }
 
-func Download(groupId, artifactId, dest, repo, filename, extension, user, pwd string) (string, string, error) {
+func Download(groupId, artifactId, version, dest, repo, filename, extension, user, pwd string) (string, string, error) {
 	a := Artifact{
 		GroupId:       groupId,
 		Id:            artifactId,
 		Extension:     extension,
+		Version:       version,
 		RepositoryUrl: repo,
 		Downloader:    httpGetCustom,
 		RepoUser:      user,
@@ -36,13 +37,14 @@ func Download(groupId, artifactId, dest, repo, filename, extension, user, pwd st
 	}
 
 	//fmt.Printf("Querying %+v\n", a)
-
-	v, err := LatestVersion(a)
-	if err != nil {
-		return "", "", err
+	if a.Version == "" {
+		v, err := LatestVersion(a)
+		if err != nil {
+			return "", "", err
+		}
+		//fmt.Printf("Latest version %s\n", v)
+		a.Version = v
 	}
-	//fmt.Printf("Latest version %s\n", v)
-	a.Version = v
 
 	url, err := ArtifactUrl(a)
 	if err != nil {
@@ -73,7 +75,7 @@ func Download(groupId, artifactId, dest, repo, filename, extension, user, pwd st
 	//}
 	//
 	//return filepath, nil
-	return v, url, nil
+	return a.Version, url, nil
 }
 
 func httpGetCustom(url, user, pwd string) (*http.Response, error) {

@@ -18,14 +18,9 @@ func NewInCmd() InCmd {
 	in := InCmd{}
 	in.Command = &cobra.Command{
 		Use:   "in",
-		Short: "A brief description of your command",
-		Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
-		Run: in.Run,
+		Short: "concourse in command",
+		Long:  `concourse in command`,
+		Run:   in.Run,
 	}
 
 	return in
@@ -39,7 +34,8 @@ func (i *InCmd) Run(cmd *cobra.Command, args []string) {
 		log.Fatal(err)
 	}
 
-	version, uri, err := download.Download(jsonIn.Source.GroupId, jsonIn.Source.ArtifactId, ".", jsonIn.Source.Repository, "download.jar", jsonIn.Source.Type, "", "")
+	version, uri, err := download.Download(jsonIn.Source.GroupId, jsonIn.Source.ArtifactId, jsonIn.Version.Ref,
+		".", jsonIn.Source.Repository, "download.jar", jsonIn.Source.Type, "", "")
 	if err != nil {
 		panic(err)
 	}

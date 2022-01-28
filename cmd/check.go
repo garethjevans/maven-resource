@@ -15,20 +15,15 @@ type CheckCmd struct {
 }
 
 func NewCheckCmd() CheckCmd {
-	in := CheckCmd{}
-	in.Command = &cobra.Command{
+	check := CheckCmd{}
+	check.Command = &cobra.Command{
 		Use:   "check",
-		Short: "A brief description of your command",
-		Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
-		Run: in.Run,
+		Short: "checks a resource",
+		Long:  `checks a resource`,
+		Run:   check.Run,
 	}
 
-	return in
+	return check
 }
 
 func (i *CheckCmd) Run(cmd *cobra.Command, args []string) {
@@ -39,7 +34,7 @@ func (i *CheckCmd) Run(cmd *cobra.Command, args []string) {
 		log.Fatal(err)
 	}
 
-	version, _, err := download.Download(jsonIn.Source.GroupId, jsonIn.Source.ArtifactId, ".", jsonIn.Source.Repository, "download.jar", jsonIn.Source.Type, "", "")
+	version, _, err := download.Download(jsonIn.Source.GroupId, jsonIn.Source.ArtifactId, "", ".", jsonIn.Source.Repository, "download.jar", jsonIn.Source.Type, "", "")
 	if err != nil {
 		panic(err)
 	}
