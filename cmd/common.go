@@ -6,6 +6,8 @@ type Source struct {
 	Repository string `json:"repository"`
 	Type       string `json:"type"`
 	Classifier string `json:"classifier"`
+	Username   string `json:"username"`
+	Password   string `json:"password"`
 }
 
 type Version struct {

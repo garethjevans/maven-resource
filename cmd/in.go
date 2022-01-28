@@ -35,7 +35,7 @@ func (i *InCmd) Run(cmd *cobra.Command, args []string) {
 	}
 
 	version, uri, err := download.Download(jsonIn.Source.GroupId, jsonIn.Source.ArtifactId, jsonIn.Version.Ref,
-		".", jsonIn.Source.Repository, "download.jar", jsonIn.Source.Type, "", "")
+		".", jsonIn.Source.Repository, "download.jar", jsonIn.Source.Type, jsonIn.Source.Username, jsonIn.Source.Password)
 	if err != nil {
 		panic(err)
 	}
