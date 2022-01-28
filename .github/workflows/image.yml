@@ -32,7 +32,7 @@ jobs:
 
           echo "Event Name = $EVENT_NAME"
           echo "Is Fork = $IS_FORK"
-          
+
           if [ "$EVENT_NAME" = "push" ]; then
             echo "::set-output name=should_push::true"
           elif [ "$EVENT_NAME" = "pull_request" ]; then
@@ -66,7 +66,7 @@ jobs:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
 
       - name: Build and push
-        uses: docker/build-push-action@ad44023a93711e3deb337508980b4b5e9bcdc5dc
+        uses: docker/build-push-action@latest
         id: build-and-push
         with:
           context: .
@@ -85,4 +85,4 @@ jobs:
           COSIGN_EXPERIMENTAL: "true"
         # This step uses the identity token to provision an ephemeral certificate
         # against the sigstore community Fulcio instance.
-        run: cosign sign ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}@${{ steps.build-and-push.outputs.digest }}      
+        run: cosign sign ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}@${{ steps.build-and-push.outputs.digest }}
