@@ -8,5 +8,8 @@ test:
 lint:
 	golangci-lint run
 
-int: build
-	./build/maven-resource in --groupId org.postgresql --artifactId postgresql --type jar --repository https://repo1.maven.org/maven2
+check: build
+	cat check.json | ./build/maven-resource check
+
+in: build
+	cat in.json | ./build/maven-resource in

@@ -10,14 +10,14 @@ import (
 	"github.com/spf13/cobra"
 )
 
-type InCmd struct {
+type CheckCmd struct {
 	Command *cobra.Command
 }
 
-func NewInCmd() InCmd {
-	in := InCmd{}
+func NewCheckCmd() CheckCmd {
+	in := CheckCmd{}
 	in.Command = &cobra.Command{
-		Use:   "in",
+		Use:   "check",
 		Short: "A brief description of your command",
 		Long: `A longer description that spans multiple lines and likely contains examples
 and usage of using your command. For example:
@@ -31,7 +31,7 @@ to quickly create a Cobra application.`,
 	return in
 }
 
-func (i *InCmd) Run(cmd *cobra.Command, args []string) {
+func (i *CheckCmd) Run(cmd *cobra.Command, args []string) {
 	var jsonIn In
 
 	err := json.NewDecoder(os.Stdin).Decode(&jsonIn)
@@ -39,20 +39,13 @@ func (i *InCmd) Run(cmd *cobra.Command, args []string) {
 		log.Fatal(err)
 	}
 
-	version, uri, err := download.Download(jsonIn.Source.GroupId, jsonIn.Source.ArtifactId, ".", jsonIn.Source.Repository, "download.jar", jsonIn.Source.Type, "", "")
+	version, _, err := download.Download(jsonIn.Source.GroupId, jsonIn.Source.ArtifactId, ".", jsonIn.Source.Repository, "download.jar", jsonIn.Source.Type, "", "")
 	if err != nil {
 		panic(err)
 	}
 
-	out := InResponse{
-		Version: Version{Ref: version},
-		Metadata: []Metadata{
-			{Name: "version", Value: version},
-			{Name: "uri", Value: uri},
-		},
-	}
-
-	b, err := json.Marshal(out)
+	refs := []Version{{Ref: version}}
+	b, err := json.Marshal(refs)
 	if err != nil {
 		panic(err)
 	}
@@ -60,7 +53,7 @@ func (i *InCmd) Run(cmd *cobra.Command, args []string) {
 }
 
 func init() {
-	rootCmd.AddCommand(NewInCmd().Command)
+	rootCmd.AddCommand(NewCheckCmd().Command)
 
 	// Here you will define your flags and configuration settings.
 

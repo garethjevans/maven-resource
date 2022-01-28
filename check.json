@@ -1,0 +1,11 @@
+{
+	"source": {
+		"groupId": "org.postgresql",
+		"artifactId": "postgresql",
+		"type": "jar",
+		"repository": "https://repo1.maven.org/maven2"
+	},
+	"version": {
+		"ref":"41.1.1"
+	}
+}
