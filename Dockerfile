@@ -5,5 +5,6 @@ FROM ubuntu:20.04
 COPY --from=go /go/bin/maven-resource /bin/maven-resource
 
 RUN maven-resource --help
-# /opt/resource/in
-# /opt/resource/out
+
+COPY scripts/in /opt/resource/in
+COPY scripts/check /opt/resource/check
