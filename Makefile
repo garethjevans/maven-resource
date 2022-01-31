@@ -9,14 +9,14 @@ lint:
 	golangci-lint run
 
 check-first-attempt: build
-	cat check-first-attempt.json | ./build/maven-resource check
+	cat cmd/testdata/check-first-attempt.json | ./build/maven-resource check
 
 check: build
-	cat check.json | ./build/maven-resource check
+	cat cmd/testdata/check.json | ./build/maven-resource check
 
 in: build
 	mkdir -p test-output
-	cat in.json | ./build/maven-resource in test-output
+	cat cmd/testdata/in.json | ./build/maven-resource in test-output
 	tree test-output
 	rm -fr test-output
 
