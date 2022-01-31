@@ -38,9 +38,12 @@ func (i *CheckCmd) Run(cmd *cobra.Command, args []string) {
 		log.Fatal(err)
 	}
 
-	versionToCheck, err := semver.NewVersion(jsonIn.Version.Ref)
-	if err != nil {
-		log.Fatalf("Error parsing version: %s: %s", jsonIn.Version.Ref, err)
+	var versionToCheck *semver.Version
+	if jsonIn.Version.Ref != "" {
+		versionToCheck, err = semver.NewVersion(jsonIn.Version.Ref)
+		if err != nil {
+			log.Fatalf("Error parsing version: %s: %s", jsonIn.Version.Ref, err)
+		}
 	}
 
 	versions, err := download.GetVersions(jsonIn.Source.GroupId, jsonIn.Source.ArtifactId, jsonIn.Source.Repository, jsonIn.Source.Username, jsonIn.Source.Password)
@@ -56,7 +59,7 @@ func (i *CheckCmd) Run(cmd *cobra.Command, args []string) {
 				log.Fatalf("Error parsing version: %s: %s", versionString, err)
 			}
 
-			if versionToCheck.LessThan(v) {
+			if versionToCheck == nil || versionToCheck.LessThan(v) {
 				refs = append(refs, Version{Ref: versionString})
 			}
 		}

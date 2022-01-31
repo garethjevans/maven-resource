@@ -8,6 +8,9 @@ test:
 lint:
 	golangci-lint run
 
+check-first-attempt: build
+	cat check-first-attempt.json | ./build/maven-resource check
+
 check: build
 	cat check.json | ./build/maven-resource check
 
