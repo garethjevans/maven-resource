@@ -79,6 +79,13 @@ func (i *InCmd) Run(cmd *cobra.Command, args []string) {
 		},
 	}
 
+	for _, m := range out.Metadata {
+		err = ioutil.WriteFile(path.Join(outputDir, m.Name), []byte(m.Value), 0644)
+		if err != nil {
+			panic(err)
+		}
+	}
+
 	b, err := json.Marshal(out)
 	if err != nil {
 		panic(err)

@@ -58,7 +58,7 @@ func (i *CheckCmd) Run(cmd *cobra.Command, args []string) {
 		if semverRE.MatchString(versionString) {
 			v, err := semver.NewVersion(versionString)
 			if err != nil {
-				log.Fatalf("Error parsing version: %s: %s", versionString, err)
+				log.Fatalf("Should never happen! Error parsing version: %s: %s", versionString, err)
 			}
 
 			if versionToCheck == nil || versionToCheck.LessThan(v) {
