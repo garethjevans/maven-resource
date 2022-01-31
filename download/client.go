@@ -21,7 +21,25 @@ type Artifact struct {
 }
 
 type metadata struct {
-	Release string `xml:"versioning>release"`
+	Versions []string `xml:"versioning>versions>version"`
+}
+
+func GetVersions(groupId, artifactId, repository, username, password string) ([]string, error) {
+	a := Artifact{
+		GroupId:       groupId,
+		Id:            artifactId,
+		RepositoryUrl: repository,
+		Downloader:    httpGetCustom,
+		RepoUser:      username,
+		RepoPassword:  password,
+	}
+
+	v, err := AllVersions(a)
+	if err != nil {
+		return nil, err
+	}
+
+	return v, nil
 }
 
 func Download(groupId, artifactId, version, dest, repo, filename, extension, user, pwd string) (string, string, error) {
@@ -34,16 +52,6 @@ func Download(groupId, artifactId, version, dest, repo, filename, extension, use
 		Downloader:    httpGetCustom,
 		RepoUser:      user,
 		RepoPassword:  pwd,
-	}
-
-	//fmt.Printf("Querying %+v\n", a)
-	if a.Version == "" {
-		v, err := LatestVersion(a)
-		if err != nil {
-			return "", "", err
-		}
-		//fmt.Printf("Latest version %s\n", v)
-		a.Version = v
 	}
 
 	url, err := ArtifactUrl(a)
@@ -124,31 +132,28 @@ func ArtifactUrl(a Artifact) (string, error) {
 	return a.RepositoryUrl + "/" + artifactPath(a), nil
 }
 
-func LatestVersion(a Artifact) (string, error) {
+func AllVersions(a Artifact) ([]string, error) {
 	// FIXME should ensure that repo url has a trailing slash
 	metadataUrl := a.RepositoryUrl + "/" + groupPath(a) + "/maven-metadata.xml"
 	resp, err := a.Downloader(metadataUrl, a.RepoUser, a.RepoPassword)
 	if err != nil {
-		return "", err
+		return nil, err
 	} else if resp.StatusCode != 200 {
-		return "", fmt.Errorf("unable to fetch maven metadata from %s Http statusCode: %d", metadataUrl, resp.StatusCode)
+		return nil, fmt.Errorf("unable to fetch maven metadata from %s Http statusCode: %d", metadataUrl, resp.StatusCode)
 	}
 
 	defer resp.Body.Close()
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 	m := metadata{}
 	err = xml.Unmarshal(body, &m)
-
-	//fmt.Printf("metadata = %+v\n", m)
-
 	if err != nil {
-		return "", nil
+		return nil, err
 	}
 
-	return m.Release, nil
+	return m.Versions, nil
 }
 
 func artifactPath(a Artifact) string {
