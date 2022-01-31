@@ -38,13 +38,13 @@ func (i *CheckCmd) Run(cmd *cobra.Command, args []string) {
 		log.Fatal(err)
 	}
 
-	fmt.Fprintf(os.Stderr, "Checking resource for %+v\n", jsonIn)
+	Log("Checking resource for %+v\n", jsonIn)
 
 	var versionToCheck *semver.Version
 	if jsonIn.Version.Ref != "" {
 		versionToCheck, err = semver.NewVersion(jsonIn.Version.Ref)
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "Skipping existing version %+s, %s\n", jsonIn.Version.Ref, err)
+			Log("Skipping existing version %+s, %s\n", jsonIn.Version.Ref, err)
 		}
 	}
 

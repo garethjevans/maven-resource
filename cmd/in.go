@@ -58,11 +58,13 @@ func (i *InCmd) Run(cmd *cobra.Command, args []string) {
 
 	if fmt.Sprintf("%x", sha1) != artifact.Sha1 {
 		log.Fatalf("calculated sha1 does not match downloaded sha1: %x != %s\n", sha1, artifact.Sha1)
+	} else {
+		Log("sha1 %s is valid\n", artifact.Sha1)
 	}
 
 	// if sha256 does exist, calculate it
 	if artifact.Sha256 == "" {
-		// TODO log a warning??
+		Log("sha256 does not exist, calculating it from downloaded file\n")
 		sha256 := sha256.Sum256(downloadedFileContents)
 		artifact.Sha256 = fmt.Sprintf("%x", sha256)
 	}
@@ -80,7 +82,9 @@ func (i *InCmd) Run(cmd *cobra.Command, args []string) {
 	}
 
 	for _, m := range out.Metadata {
-		err = ioutil.WriteFile(path.Join(outputDir, m.Name), []byte(m.Value), 0644)
+		file := path.Join(outputDir, m.Name)
+		Log("creating %s\n", file)
+		err = ioutil.WriteFile(file, []byte(m.Value), 0644)
 		if err != nil {
 			panic(err)
 		}
@@ -90,5 +94,6 @@ func (i *InCmd) Run(cmd *cobra.Command, args []string) {
 	if err != nil {
 		panic(err)
 	}
+	
 	fmt.Println(string(b))
 }
