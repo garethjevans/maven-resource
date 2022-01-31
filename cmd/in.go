@@ -1,11 +1,15 @@
 package cmd
 
 import (
+	"crypto/sha1"
+	"crypto/sha256"
 	"encoding/json"
 	"fmt"
 	"github.com/garethjevans/maven-resource/download"
+	"io/ioutil"
 	"log"
 	"os"
+	"path"
 
 	"github.com/spf13/cobra"
 )
@@ -34,17 +38,44 @@ func (i *InCmd) Run(cmd *cobra.Command, args []string) {
 		log.Fatal(err)
 	}
 
-	version, uri, err := download.Download(jsonIn.Source.GroupId, jsonIn.Source.ArtifactId, jsonIn.Version.Ref,
-		".", jsonIn.Source.Repository, "download.jar", jsonIn.Source.Type, jsonIn.Source.Username, jsonIn.Source.Password)
+	outputDir := args[0]
+
+	// groupId, artifactId, version, dest, repo, extension, user, pwd string
+	artifact, err := download.Download(jsonIn.Source.GroupId, jsonIn.Source.ArtifactId, jsonIn.Version.Ref,
+		outputDir, jsonIn.Source.Repository, jsonIn.Source.Type, jsonIn.Source.Username, jsonIn.Source.Password)
 	if err != nil {
 		panic(err)
 	}
 
+	// lets validate sha1, this should always exist
+	downloadedFilePath := path.Join(outputDir, artifact.Filename)
+	downloadedFileContents, err := ioutil.ReadFile(downloadedFilePath)
+	if err != nil {
+		panic(err)
+	}
+
+	sha1 := sha1.Sum(downloadedFileContents)
+
+	if fmt.Sprintf("%x", sha1) != artifact.Sha1 {
+		log.Fatalf("calculated sha1 does not match downloaded sha1: %x != %s\n", sha1, artifact.Sha1)
+	}
+
+	// if sha256 does exist, calculate it
+	if artifact.Sha256 == "" {
+		// TODO log a warning??
+		sha256 := sha256.Sum256(downloadedFileContents)
+		artifact.Sha256 = fmt.Sprintf("%x", sha256)
+	}
+
 	out := InResponse{
-		Version: Version{Ref: version},
+		Version: Version{Ref: artifact.Version},
 		Metadata: []Metadata{
-			{Name: "version", Value: version},
-			{Name: "uri", Value: uri},
+			{Name: "version", Value: artifact.Version},
+			{Name: "uri", Value: artifact.Url},
+			{Name: "filename", Value: artifact.Filename},
+			{Name: "cpe", Value: fmt.Sprintf("cpe:2.3:a:%s:%s:%s:*:*:*:*:*:*:*", jsonIn.Source.GroupId, jsonIn.Source.ArtifactId, artifact.Version)},
+			{Name: "sha1", Value: artifact.Sha1},
+			{Name: "sha256", Value: artifact.Sha256},
 		},
 	}
 
