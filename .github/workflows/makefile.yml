@@ -18,10 +18,4 @@ jobs:
       run: make build
       
     - name: Test
-      run: make test
-      
-    - name: Run check
-      run: make check
-      
-    - name: Run in
-      run: make in
+      run: make test-all
