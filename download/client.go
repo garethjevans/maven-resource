@@ -3,8 +3,10 @@ package download
 import (
 	"encoding/xml"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"net/http"
+	"os"
 	"strings"
 )
 
@@ -18,6 +20,14 @@ type Artifact struct {
 	RepoUser      string
 	RepoPassword  string
 	Downloader    func(string, string, string) (*http.Response, error)
+}
+
+type DownloadedArtifact struct {
+	Filename string
+	Url      string
+	Version  string
+	Sha1     string
+	Sha256   string
 }
 
 type metadata struct {
@@ -42,7 +52,7 @@ func GetVersions(groupId, artifactId, repository, username, password string) ([]
 	return v, nil
 }
 
-func Download(groupId, artifactId, version, dest, repo, filename, extension, user, pwd string) (string, string, error) {
+func Download(groupId, artifactId, version, dest, repo, extension, user, pwd string) (*DownloadedArtifact, error) {
 	a := Artifact{
 		GroupId:       groupId,
 		Id:            artifactId,
@@ -54,36 +64,36 @@ func Download(groupId, artifactId, version, dest, repo, filename, extension, use
 		RepoPassword:  pwd,
 	}
 
-	url, err := ArtifactUrl(a)
+	return DownloadArtifact(a, dest)
+}
+
+func DownloadArtifact(a Artifact, dest string) (*DownloadedArtifact, error) {
+	url := ArtifactUrl(a)
+
+	resp, err := a.Downloader(url, a.RepoUser, a.RepoPassword)
 	if err != nil {
-		return "", "", err
+		return nil, err
 	}
-	//
-	//resp, err := a.Downloader(url, user, pwd)
-	//if err != nil {
-	//	return "", err
-	//}
-	//defer resp.Body.Close()
-	//
-	//if filename == "" {
-	//	filename = FileName(a)
-	//}
-	//
-	//filepath := dest + "/" + filename
-	//
-	//out, err := os.Create(filepath)
-	//if err != nil {
-	//	return "", err
-	//}
-	//defer out.Close()
-	//
-	//_, err = io.Copy(out, resp.Body)
-	//if err != nil {
-	//	return "", err
-	//}
-	//
-	//return filepath, nil
-	return a.Version, url, nil
+	defer resp.Body.Close()
+
+	filename := FileName(a)
+	filepath := dest + "/" + filename
+
+	out, err := os.Create(filepath)
+	if err != nil {
+		return nil, err
+	}
+	defer out.Close()
+
+	_, err = io.Copy(out, resp.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	sha1 := Sha1(a)
+	sha256 := Sha256(a)
+
+	return &DownloadedArtifact{Version: a.Version, Url: url, Filename: filename, Sha1: sha1, Sha256: sha256}, nil
 }
 
 func httpGetCustom(url, user, pwd string) (*http.Response, error) {
@@ -115,21 +125,51 @@ func FileName(a Artifact) string {
 	}
 }
 
-func ArtifactUrl(a Artifact) (string, error) {
+func ArtifactUrl(a Artifact) string {
 	if a.RepositoryUrl == "" {
 		a.RepositoryUrl = "https://repo1.maven.org/maven2/"
 	}
 
-	//if a.IsSnapshot {
-	//	var err error
-	//	a.SnapshotVersion, err = LatestSnapshotVersion(a)
-	//	if err != nil {
-	//		return "", err
-	//	}
-	//}
-
 	// FIXME should ensure that repo url has a trailing slash
-	return a.RepositoryUrl + "/" + artifactPath(a), nil
+	return a.RepositoryUrl + "/" + artifactPath(a)
+}
+
+func Sha1(a Artifact) string {
+	url := ArtifactUrl(a) + ".sha1"
+	r, err := a.Downloader(url, a.RepoUser, a.RepoPassword)
+	if err != nil {
+		panic(err)
+	}
+	defer r.Body.Close()
+
+	if r.StatusCode != 200 {
+		return ""
+	}
+
+	body, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		panic(err)
+	}
+	return string(body)
+}
+
+func Sha256(a Artifact) string {
+	url := ArtifactUrl(a) + ".sha256"
+	r, err := a.Downloader(url, a.RepoUser, a.RepoPassword)
+	if err != nil {
+		panic(err)
+	}
+	defer r.Body.Close()
+
+	if r.StatusCode != 200 {
+		return ""
+	}
+
+	body, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		panic(err)
+	}
+	return string(body)
 }
 
 func AllVersions(a Artifact) ([]string, error) {
