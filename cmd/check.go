@@ -3,11 +3,13 @@ package cmd
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/Masterminds/semver/v3"
-	"github.com/garethjevans/maven-resource/download"
 	"log"
 	"os"
 	"regexp"
+	"strings"
+
+	"github.com/Masterminds/semver/v3"
+	"github.com/garethjevans/maven-resource/download"
 
 	"github.com/spf13/cobra"
 )
@@ -53,12 +55,21 @@ func (i *CheckCmd) Run(cmd *cobra.Command, args []string) {
 		panic(err)
 	}
 
+	fmt.Println("versions: ", versions)
+
 	var refs []Version
 	for _, versionString := range versions {
+		compVersionString := versionString
+		versionString = strings.Replace(versionString, ".RELEASE", "", -1)
+
 		if semverRE.MatchString(versionString) {
 			v, err := semver.NewVersion(versionString)
 			if err != nil {
 				log.Fatalf("Should never happen! Error parsing version: %s: %s", versionString, err)
+			}
+
+			if strings.Contains(compVersionString, ".RELEASE") {
+				versionString = versionString + ".RELEASE"
 			}
 
 			if versionToCheck == nil || versionToCheck.LessThan(v) {

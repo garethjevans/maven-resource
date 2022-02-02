@@ -11,6 +11,9 @@ lint:
 check-first-attempt: build
 	cat cmd/testdata/check-first-attempt.json | ./build/maven-resource check
 
+check-lifecycle-attempt: build
+	cat cmd/testdata/check-lifecycle-attempt.json | ./build/maven-resource check
+
 check: build
 	cat cmd/testdata/check.json | ./build/maven-resource check
 
