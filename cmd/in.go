@@ -5,17 +5,18 @@ import (
 	"crypto/sha256"
 	"encoding/json"
 	"fmt"
-	"github.com/garethjevans/maven-resource/download"
 	"io/ioutil"
 	"log"
 	"os"
 	"path"
 
+	"github.com/garethjevans/maven-resource/download"
 	"github.com/spf13/cobra"
 )
 
 type InCmd struct {
-	Command *cobra.Command
+	Command    *cobra.Command
+	Downloader download.Downloader
 }
 
 func NewInCmd() InCmd {
@@ -41,8 +42,8 @@ func (i *InCmd) Run(cmd *cobra.Command, args []string) {
 	outputDir := args[0]
 
 	// groupId, artifactId, version, dest, repo, extension, user, pwd string
-	artifact, err := download.Download(jsonIn.Source.GroupId, jsonIn.Source.ArtifactId, jsonIn.Version.Ref,
-		outputDir, jsonIn.Source.Repository, jsonIn.Source.Type, jsonIn.Source.Username, jsonIn.Source.Password)
+	artifact, err := i.Downloader.Download(jsonIn.Source.GroupId, jsonIn.Source.ArtifactId, jsonIn.Version.Ref,
+		outputDir, jsonIn.Source.Repository, jsonIn.Source.Type)
 	if err != nil {
 		panic(err)
 	}
@@ -94,6 +95,6 @@ func (i *InCmd) Run(cmd *cobra.Command, args []string) {
 	if err != nil {
 		panic(err)
 	}
-	
+
 	fmt.Println(string(b))
 }
