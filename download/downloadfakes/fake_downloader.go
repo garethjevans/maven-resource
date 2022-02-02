@@ -4,12 +4,11 @@ package downloadfakes
 import (
 	"sync"
 
-	"github.com/Masterminds/semver"
 	"github.com/garethjevans/maven-resource/download"
 )
 
 type FakeDownloader struct {
-	DownloadStub        func(string, string, string, string, string) (*download.DownloadedArtifact, error)
+	DownloadStub        func(string, string, string, string, string, string) (*download.DownloadedArtifact, error)
 	downloadMutex       sync.RWMutex
 	downloadArgsForCall []struct {
 		arg1 string
@@ -17,6 +16,7 @@ type FakeDownloader struct {
 		arg3 string
 		arg4 string
 		arg5 string
+		arg6 string
 	}
 	downloadReturns struct {
 		result1 *download.DownloadedArtifact
@@ -26,24 +26,24 @@ type FakeDownloader struct {
 		result1 *download.DownloadedArtifact
 		result2 error
 	}
-	GetVersionsStub        func(string) ([]*semver.Version, error)
+	GetVersionsStub        func(string) ([]string, error)
 	getVersionsMutex       sync.RWMutex
 	getVersionsArgsForCall []struct {
 		arg1 string
 	}
 	getVersionsReturns struct {
-		result1 []*semver.Version
+		result1 []string
 		result2 error
 	}
 	getVersionsReturnsOnCall map[int]struct {
-		result1 []*semver.Version
+		result1 []string
 		result2 error
 	}
 	invocations      map[string][][]interface{}
 	invocationsMutex sync.RWMutex
 }
 
-func (fake *FakeDownloader) Download(arg1 string, arg2 string, arg3 string, arg4 string, arg5 string) (*download.DownloadedArtifact, error) {
+func (fake *FakeDownloader) Download(arg1 string, arg2 string, arg3 string, arg4 string, arg5 string, arg6 string) (*download.DownloadedArtifact, error) {
 	fake.downloadMutex.Lock()
 	ret, specificReturn := fake.downloadReturnsOnCall[len(fake.downloadArgsForCall)]
 	fake.downloadArgsForCall = append(fake.downloadArgsForCall, struct {
@@ -52,13 +52,14 @@ func (fake *FakeDownloader) Download(arg1 string, arg2 string, arg3 string, arg4
 		arg3 string
 		arg4 string
 		arg5 string
-	}{arg1, arg2, arg3, arg4, arg5})
+		arg6 string
+	}{arg1, arg2, arg3, arg4, arg5, arg6})
 	stub := fake.DownloadStub
 	fakeReturns := fake.downloadReturns
-	fake.recordInvocation("Download", []interface{}{arg1, arg2, arg3, arg4, arg5})
+	fake.recordInvocation("Download", []interface{}{arg1, arg2, arg3, arg4, arg5, arg6})
 	fake.downloadMutex.Unlock()
 	if stub != nil {
-		return stub(arg1, arg2, arg3, arg4, arg5)
+		return stub(arg1, arg2, arg3, arg4, arg5, arg6)
 	}
 	if specificReturn {
 		return ret.result1, ret.result2
@@ -72,17 +73,17 @@ func (fake *FakeDownloader) DownloadCallCount() int {
 	return len(fake.downloadArgsForCall)
 }
 
-func (fake *FakeDownloader) DownloadCalls(stub func(string, string, string, string, string) (*download.DownloadedArtifact, error)) {
+func (fake *FakeDownloader) DownloadCalls(stub func(string, string, string, string, string, string) (*download.DownloadedArtifact, error)) {
 	fake.downloadMutex.Lock()
 	defer fake.downloadMutex.Unlock()
 	fake.DownloadStub = stub
 }
 
-func (fake *FakeDownloader) DownloadArgsForCall(i int) (string, string, string, string, string) {
+func (fake *FakeDownloader) DownloadArgsForCall(i int) (string, string, string, string, string, string) {
 	fake.downloadMutex.RLock()
 	defer fake.downloadMutex.RUnlock()
 	argsForCall := fake.downloadArgsForCall[i]
-	return argsForCall.arg1, argsForCall.arg2, argsForCall.arg3, argsForCall.arg4, argsForCall.arg5
+	return argsForCall.arg1, argsForCall.arg2, argsForCall.arg3, argsForCall.arg4, argsForCall.arg5, argsForCall.arg6
 }
 
 func (fake *FakeDownloader) DownloadReturns(result1 *download.DownloadedArtifact, result2 error) {
@@ -111,7 +112,7 @@ func (fake *FakeDownloader) DownloadReturnsOnCall(i int, result1 *download.Downl
 	}{result1, result2}
 }
 
-func (fake *FakeDownloader) GetVersions(arg1 string) ([]*semver.Version, error) {
+func (fake *FakeDownloader) GetVersions(arg1 string) ([]string, error) {
 	fake.getVersionsMutex.Lock()
 	ret, specificReturn := fake.getVersionsReturnsOnCall[len(fake.getVersionsArgsForCall)]
 	fake.getVersionsArgsForCall = append(fake.getVersionsArgsForCall, struct {
@@ -136,7 +137,7 @@ func (fake *FakeDownloader) GetVersionsCallCount() int {
 	return len(fake.getVersionsArgsForCall)
 }
 
-func (fake *FakeDownloader) GetVersionsCalls(stub func(string) ([]*semver.Version, error)) {
+func (fake *FakeDownloader) GetVersionsCalls(stub func(string) ([]string, error)) {
 	fake.getVersionsMutex.Lock()
 	defer fake.getVersionsMutex.Unlock()
 	fake.GetVersionsStub = stub
@@ -149,28 +150,28 @@ func (fake *FakeDownloader) GetVersionsArgsForCall(i int) string {
 	return argsForCall.arg1
 }
 
-func (fake *FakeDownloader) GetVersionsReturns(result1 []*semver.Version, result2 error) {
+func (fake *FakeDownloader) GetVersionsReturns(result1 []string, result2 error) {
 	fake.getVersionsMutex.Lock()
 	defer fake.getVersionsMutex.Unlock()
 	fake.GetVersionsStub = nil
 	fake.getVersionsReturns = struct {
-		result1 []*semver.Version
+		result1 []string
 		result2 error
 	}{result1, result2}
 }
 
-func (fake *FakeDownloader) GetVersionsReturnsOnCall(i int, result1 []*semver.Version, result2 error) {
+func (fake *FakeDownloader) GetVersionsReturnsOnCall(i int, result1 []string, result2 error) {
 	fake.getVersionsMutex.Lock()
 	defer fake.getVersionsMutex.Unlock()
 	fake.GetVersionsStub = nil
 	if fake.getVersionsReturnsOnCall == nil {
 		fake.getVersionsReturnsOnCall = make(map[int]struct {
-			result1 []*semver.Version
+			result1 []string
 			result2 error
 		})
 	}
 	fake.getVersionsReturnsOnCall[i] = struct {
-		result1 []*semver.Version
+		result1 []string
 		result2 error
 	}{result1, result2}
 }
