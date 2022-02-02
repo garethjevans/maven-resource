@@ -55,8 +55,6 @@ func (i *CheckCmd) Run(cmd *cobra.Command, args []string) {
 		panic(err)
 	}
 
-	fmt.Println("versions: ", versions)
-
 	var refs []Version
 	for _, versionString := range versions {
 		compVersionString := versionString
