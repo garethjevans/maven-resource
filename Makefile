@@ -8,19 +8,15 @@ test:
 lint:
 	golangci-lint run
 
-check-first-attempt: build
-	cat cmd/testdata/check-first-attempt.json | ./build/maven-resource check
+check-%: build
+	cat cmd/testdata/check-$*.json
+	cat cmd/testdata/check-$*.json | ./build/maven-resource check
 
-check-lifecycle-versions: build
-	cat cmd/testdata/check-lifecycle-versions.json | ./build/maven-resource check
-
-check: build
-	cat cmd/testdata/check.json | ./build/maven-resource check
-
-in: build
+in-%: build
 	mkdir -p test-output
-	cat cmd/testdata/in.json | ./build/maven-resource in test-output
+	cat cmd/testdata/in-$*.json | ./build/maven-resource in test-output
 	tree test-output
+	find test-output -type file | grep -v jar | xargs cat -A
 	rm -fr test-output
 
-test-all: test check check-first-attempt check-lifecycle-versions in
+test-all: test check-postgres check-first-attempt check-lifecycle-versions in-postgres

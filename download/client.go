@@ -103,6 +103,7 @@ func DownloadArtifact(a Artifact, dest string) (*DownloadedArtifact, error) {
 }
 
 func httpGetCustom(url, user, pwd string) (*http.Response, error) {
+	Log("Requesting %s\n", url)
 	if user != "" && pwd != "" {
 		client := &http.Client{}
 		req, err := http.NewRequest("GET", url, nil)
@@ -133,7 +134,7 @@ func FileName(a Artifact) string {
 
 func ArtifactUrl(a Artifact) string {
 	if a.RepositoryUrl == "" {
-		a.RepositoryUrl = "https://repo1.maven.org/maven2/"
+		a.RepositoryUrl = "https://repo1.maven.org/maven2"
 	}
 
 	// FIXME should ensure that repo url has a trailing slash
@@ -190,9 +191,11 @@ func AllVersions(a Artifact) ([]string, error) {
 
 	defer resp.Body.Close()
 	body, err := ioutil.ReadAll(resp.Body)
+
 	if err != nil {
 		return nil, err
 	}
+	Log("Body %s\n", string(body))
 	m := metadata{}
 	err = xml.Unmarshal(body, &m)
 	if err != nil {
@@ -212,4 +215,8 @@ func groupPath(a Artifact) string {
 		parts = append(parts, a.Version)
 	}
 	return strings.Join(parts, "/")
+}
+
+func Log(format string, args ...interface{}) {
+	fmt.Fprintf(os.Stderr, format, args...)
 }
