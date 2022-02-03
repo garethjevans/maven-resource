@@ -37,14 +37,14 @@ type metadata struct {
 }
 
 type Downloader interface {
-	GetVersions(repository string) ([]string, error)
+	GetVersions(repository, groupId, artifactId string) ([]string, error)
 	Download(groupId, artifactId, version, dest, repo, extension string) (*DownloadedArtifact, error)
 }
 
 type DefaultDownloader struct {
 }
 
-func (d *DefaultDownloader) GetVersions(repository string) ([]string, error) {
+func (d *DefaultDownloader) GetVersions(repository, artifactId, groupId string) ([]string, error) {
 	a := Artifact{
 		RepositoryUrl: repository,
 		Downloader:    httpGetCustom,

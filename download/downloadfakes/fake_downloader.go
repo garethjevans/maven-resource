@@ -112,7 +112,7 @@ func (fake *FakeDownloader) DownloadReturnsOnCall(i int, result1 *download.Downl
 	}{result1, result2}
 }
 
-func (fake *FakeDownloader) GetVersions(arg1 string) ([]string, error) {
+func (fake *FakeDownloader) GetVersions(arg1, arg2, arg3 string) ([]string, error) {
 	fake.getVersionsMutex.Lock()
 	ret, specificReturn := fake.getVersionsReturnsOnCall[len(fake.getVersionsArgsForCall)]
 	fake.getVersionsArgsForCall = append(fake.getVersionsArgsForCall, struct {

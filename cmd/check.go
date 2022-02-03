@@ -49,7 +49,7 @@ func (i *CheckCmd) RunWithInput(jsonIn In) ([]Version, error) {
 		}
 	}
 
-	versions, err := i.Downloader.GetVersions(jsonIn.Source.Repository)
+	versions, err := i.Downloader.GetVersions(jsonIn.Source.Repository, jsonIn.Source.ArtifactId, jsonIn.Source.GroupId)
 	if err != nil {
 		return nil, err
 	}
