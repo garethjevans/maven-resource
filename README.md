@@ -1,12 +1,8 @@
 # Maven Resource
 
-a concourse resource that can track information about a maven dependency
-
-# Maven Resource
-
 [![Go Report Card](https://goreportcard.com/badge/github.com/garethjevans/maven-resource)](https://goreportcard.com/report/github.com/garethjevans/maven-resource)
 
-Deploys and retrieve artifacts from a Maven Repository Manager.
+A concourse resource that can track information about a maven dependency.
 
 ## Source Configuration
 
