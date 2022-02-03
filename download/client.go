@@ -47,6 +47,8 @@ type DefaultDownloader struct {
 func (d *DefaultDownloader) GetVersions(repository, artifactId, groupId string) ([]string, error) {
 	a := Artifact{
 		RepositoryUrl: repository,
+		GroupId:       groupId,
+		Id:            artifactId,
 		Downloader:    httpGetCustom,
 	}
 
