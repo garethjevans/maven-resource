@@ -16,7 +16,7 @@ in-%: build
 	mkdir -p test-output
 	cat cmd/testdata/in-$*.json | ./build/maven-resource in test-output
 	tree test-output
-	find test-output -type file | grep -v jar | xargs cat -A
+	find test-output -type file | grep -v jar | xargs cat
 	rm -fr test-output
 
 test-all: test check-postgres check-first-attempt check-lifecycle-versions in-postgres

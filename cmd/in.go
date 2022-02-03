@@ -9,6 +9,7 @@ import (
 	"log"
 	"os"
 	"path"
+	"strings"
 
 	"github.com/garethjevans/maven-resource/download"
 	"github.com/spf13/cobra"
@@ -68,13 +69,16 @@ func (i *InCmd) Run(cmd *cobra.Command, args []string) {
 		artifact.Sha256 = fmt.Sprintf("%x", sha256)
 	}
 
+	versionWithoutRelease := strings.Replace(artifact.Version, ".RELEASE", "", -1)
+
 	out := InResponse{
 		Version: Version{Ref: artifact.Version},
 		Metadata: []Metadata{
-			{Name: "version", Value: artifact.Version},
+			{Name: "version", Value: versionWithoutRelease},
 			{Name: "uri", Value: artifact.Url},
 			{Name: "filename", Value: artifact.Filename},
-			{Name: "cpe", Value: fmt.Sprintf("cpe:2.3:a:%s:%s:%s:*:*:*:*:*:*:*", jsonIn.Source.GroupId, jsonIn.Source.ArtifactId, artifact.Version)},
+			{Name: "cpe", Value: versionWithoutRelease},
+			{Name: "purl", Value: versionWithoutRelease},
 			{Name: "sha1", Value: artifact.Sha1},
 			{Name: "sha256", Value: artifact.Sha256},
 		},
