@@ -23,4 +23,4 @@ in: build
 	tree test-output
 	rm -fr test-output
 
-test-all: test check check-first-attempt in
+test-all: test check check-first-attempt check-lifecycle-versions in

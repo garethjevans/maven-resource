@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"log"
 	"os"
 
 	"github.com/spf13/cobra"
@@ -21,6 +22,7 @@ func Execute() {
 
 	err := rootCmd.Execute()
 	if err != nil {
+		log.Fatalf("Some kind of error: %s", err)
 		os.Exit(1)
 	}
 }

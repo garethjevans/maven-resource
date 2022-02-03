@@ -20,7 +20,7 @@ type InCmd struct {
 }
 
 func NewInCmd() InCmd {
-	in := InCmd{}
+	in := InCmd{Downloader: &download.DefaultDownloader{}}
 	in.Command = &cobra.Command{
 		Use:   "in",
 		Short: "concourse in command",
@@ -41,11 +41,9 @@ func (i *InCmd) Run(cmd *cobra.Command, args []string) {
 
 	outputDir := args[0]
 
-	// groupId, artifactId, version, dest, repo, extension, user, pwd string
-	artifact, err := i.Downloader.Download(jsonIn.Source.GroupId, jsonIn.Source.ArtifactId, jsonIn.Version.Ref,
-		outputDir, jsonIn.Source.Repository, jsonIn.Source.Type)
+	artifact, err := i.Downloader.Download(jsonIn.Source.GroupId, jsonIn.Source.ArtifactId, jsonIn.Version.Ref, outputDir, jsonIn.Source.Repository, jsonIn.Source.Type)
 	if err != nil {
-		panic(err)
+		log.Fatalf("Error: %s", err)
 	}
 
 	// lets validate sha1, this should always exist
