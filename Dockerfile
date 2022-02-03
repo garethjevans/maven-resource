@@ -1,5 +1,5 @@
 FROM golang:1.17.5 as go
-RUN GO111MODULES=on go get -u -ldflags="-s -w" github.com/garethjevans/maven-resource
+RUN GOPROXY=direct GO111MODULES=on go get -u -ldflags="-s -w" github.com/garethjevans/maven-resource
 
 FROM ubuntu:20.04
 RUN apt-get update && apt-get install -y ca-certificates && apt-get clean
