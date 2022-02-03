@@ -43,6 +43,8 @@ func (i *CheckCmd) RunWithInput(jsonIn In) ([]Version, error) {
 	var versionToCheck *semver.Version
 
 	if jsonIn.Version.Ref != "" {
+		jsonIn.Version.Ref = strings.Replace(jsonIn.Version.Ref, ".RELEASE", "", -1)
+
 		versionToCheck, err = semver.NewVersion(jsonIn.Version.Ref)
 		if err != nil {
 			Log("Skipping existing version %+s, %s\n", jsonIn.Version.Ref, err)
@@ -71,7 +73,7 @@ func (i *CheckCmd) RunWithInput(jsonIn In) ([]Version, error) {
 				versionString = versionString + ".RELEASE"
 			}
 
-			if versionToCheck == nil || versionToCheck.LessThan(v) {
+			if versionToCheck == nil || versionToCheck.LessThan(v) || *versionToCheck == *v {
 				refs = append(refs, Version{Ref: versionString})
 			}
 		}
