@@ -22,7 +22,7 @@ func Execute() {
 
 	err := rootCmd.Execute()
 	if err != nil {
-		log.Fatalf("Some kind of error: %s", err)
+		log.Fatalf("Error: %s", err)
 		os.Exit(1)
 	}
 }
