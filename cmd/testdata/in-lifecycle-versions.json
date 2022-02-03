@@ -1,0 +1,11 @@
+{
+	"source": {
+		"groupId": "org.cloudfoundry",
+		"artifactId": "tomcat-lifecycle-support",
+		"type": "jar",
+		"repository": "https://repo.spring.io/release"
+	},
+	"version": {
+		"ref":"3.1.0.RELEASE"
+	}
+}
