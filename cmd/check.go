@@ -3,11 +3,13 @@ package cmd
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/Masterminds/semver/v3"
-	"github.com/garethjevans/maven-resource/download"
 	"log"
 	"os"
 	"regexp"
+	"strings"
+
+	"github.com/Masterminds/semver/v3"
+	"github.com/garethjevans/maven-resource/download"
 
 	"github.com/spf13/cobra"
 )
@@ -15,11 +17,15 @@ import (
 var semverRE = regexp.MustCompile(`^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$`)
 
 type CheckCmd struct {
-	Command *cobra.Command
+	Command    *cobra.Command
+	Downloader download.Downloader
 }
 
 func NewCheckCmd() CheckCmd {
-	check := CheckCmd{}
+	check := CheckCmd{
+		Downloader: &download.DefaultDownloader{},
+	}
+
 	check.Command = &cobra.Command{
 		Use:   "check",
 		Short: "checks a resource",
@@ -30,6 +36,52 @@ func NewCheckCmd() CheckCmd {
 	return check
 }
 
+func (i *CheckCmd) RunWithInput(jsonIn In) ([]Version, error) {
+	Log("Checking resource for %+v\n", jsonIn)
+
+	var err error
+	var versionToCheck *semver.Version
+
+	if jsonIn.Version.Ref != "" {
+		jsonIn.Version.Ref = strings.Replace(jsonIn.Version.Ref, ".RELEASE", "", -1)
+
+		versionToCheck, err = semver.NewVersion(jsonIn.Version.Ref)
+		if err != nil {
+			Log("Skipping existing version %+s, %s\n", jsonIn.Version.Ref, err)
+		}
+	}
+
+	versions, err := i.Downloader.GetVersions(jsonIn.Source.Repository, jsonIn.Source.ArtifactId, jsonIn.Source.GroupId)
+	if err != nil {
+		return nil, err
+	}
+
+	Log("Got %d versions. Filtering...\n", len(versions))
+	var refs []Version
+
+	for _, versionString := range versions {
+		compVersionString := versionString
+		versionString = strings.Replace(versionString, ".RELEASE", "", -1)
+
+		if semverRE.MatchString(versionString) {
+			v, err := semver.NewVersion(versionString)
+			if err != nil {
+				log.Fatalf("Should never happen! Error parsing version: %s: %s", versionString, err)
+			}
+
+			if strings.Contains(compVersionString, ".RELEASE") {
+				versionString = versionString + ".RELEASE"
+			}
+
+			if versionToCheck == nil || versionToCheck.LessThan(v) || *versionToCheck == *v {
+				refs = append(refs, Version{Ref: versionString})
+			}
+		}
+	}
+
+	return refs, nil
+}
+
 func (i *CheckCmd) Run(cmd *cobra.Command, args []string) {
 	var jsonIn In
 
@@ -38,37 +90,15 @@ func (i *CheckCmd) Run(cmd *cobra.Command, args []string) {
 		log.Fatal(err)
 	}
 
-	Log("Checking resource for %+v\n", jsonIn)
-
-	var versionToCheck *semver.Version
-	if jsonIn.Version.Ref != "" {
-		versionToCheck, err = semver.NewVersion(jsonIn.Version.Ref)
-		if err != nil {
-			Log("Skipping existing version %+s, %s\n", jsonIn.Version.Ref, err)
-		}
+	v, err := i.RunWithInput(jsonIn)
+	if err != nil {
+		log.Fatal(err)
 	}
 
-	versions, err := download.GetVersions(jsonIn.Source.GroupId, jsonIn.Source.ArtifactId, jsonIn.Source.Repository, jsonIn.Source.Username, jsonIn.Source.Password)
+	b, err := json.Marshal(v)
 	if err != nil {
 		panic(err)
 	}
 
-	var refs []Version
-	for _, versionString := range versions {
-		if semverRE.MatchString(versionString) {
-			v, err := semver.NewVersion(versionString)
-			if err != nil {
-				log.Fatalf("Should never happen! Error parsing version: %s: %s", versionString, err)
-			}
-
-			if versionToCheck == nil || versionToCheck.LessThan(v) {
-				refs = append(refs, Version{Ref: versionString})
-			}
-		}
-	}
-	b, err := json.Marshal(refs)
-	if err != nil {
-		panic(err)
-	}
 	fmt.Println(string(b))
 }

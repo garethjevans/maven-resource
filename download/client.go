@@ -10,6 +10,8 @@ import (
 	"strings"
 )
 
+//go:generate go run github.com/maxbrunsfeld/counterfeiter/v6 . Downloader
+
 type Artifact struct {
 	GroupId       string
 	Id            string
@@ -34,14 +36,20 @@ type metadata struct {
 	Versions []string `xml:"versioning>versions>version"`
 }
 
-func GetVersions(groupId, artifactId, repository, username, password string) ([]string, error) {
+type Downloader interface {
+	GetVersions(repository, groupId, artifactId string) ([]string, error)
+	Download(groupId, artifactId, version, dest, repo, extension string) (*DownloadedArtifact, error)
+}
+
+type DefaultDownloader struct {
+}
+
+func (d *DefaultDownloader) GetVersions(repository, artifactId, groupId string) ([]string, error) {
 	a := Artifact{
+		RepositoryUrl: repository,
 		GroupId:       groupId,
 		Id:            artifactId,
-		RepositoryUrl: repository,
 		Downloader:    httpGetCustom,
-		RepoUser:      username,
-		RepoPassword:  password,
 	}
 
 	v, err := AllVersions(a)
@@ -52,7 +60,7 @@ func GetVersions(groupId, artifactId, repository, username, password string) ([]
 	return v, nil
 }
 
-func Download(groupId, artifactId, version, dest, repo, extension, user, pwd string) (*DownloadedArtifact, error) {
+func (d *DefaultDownloader) Download(groupId, artifactId, version, dest, repo, extension string) (*DownloadedArtifact, error) {
 	a := Artifact{
 		GroupId:       groupId,
 		Id:            artifactId,
@@ -60,8 +68,6 @@ func Download(groupId, artifactId, version, dest, repo, extension, user, pwd str
 		Version:       version,
 		RepositoryUrl: repo,
 		Downloader:    httpGetCustom,
-		RepoUser:      user,
-		RepoPassword:  pwd,
 	}
 
 	return DownloadArtifact(a, dest)
