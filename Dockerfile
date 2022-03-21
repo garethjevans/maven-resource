@@ -1,4 +1,4 @@
-FROM golang:1.17.8 as go
+FROM golang:1.18.0 as go
 RUN GOPROXY=direct GO111MODULES=on go get -u -ldflags="-s -w" github.com/garethjevans/maven-resource
 
 FROM ubuntu:20.04
