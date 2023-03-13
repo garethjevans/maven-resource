@@ -1,4 +1,4 @@
-FROM golang:1.20.1 as go
+FROM golang:1.20.2 as go
 RUN GOPROXY=direct GO111MODULES=on go install github.com/garethjevans/maven-resource@main
 
 FROM ubuntu:23.04
