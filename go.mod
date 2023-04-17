@@ -3,7 +3,7 @@ module github.com/garethjevans/maven-resource
 go 1.17
 
 require (
-	github.com/Masterminds/semver/v3 v3.2.0
+	github.com/Masterminds/semver/v3 v3.2.1
 	github.com/maxbrunsfeld/counterfeiter/v6 v6.6.1
 	github.com/spf13/cobra v1.7.0
 	github.com/stretchr/testify v1.8.2
