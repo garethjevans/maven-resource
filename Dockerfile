@@ -1,7 +1,7 @@
 FROM golang:1.20.4 as go
 RUN GOPROXY=direct GO111MODULES=on go install github.com/garethjevans/maven-resource@main
 
-FROM ubuntu:23.04
+FROM ubuntu:23.10
 RUN apt-get update && apt-get install -y ca-certificates && apt-get clean
 
 COPY --from=go /go/bin/maven-resource /bin/maven-resource
